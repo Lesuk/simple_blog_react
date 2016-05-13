@@ -1,6 +1,6 @@
 import React, { Component, PropTypes } from 'react';
 import { reduxForm } from 'redux-form';
-import { createPost } from '../actions/index';
+import { fetchPost, updatePost } from '../actions/index';
 import { Link } from 'react-router';
 
 import {Card, CardActions, CardHeader, CardText} from 'material-ui/Card';
@@ -12,48 +12,82 @@ const style = {
     maxWidth: 960,
     margin: '30px auto'
   },
-
   rootInput: {
     width: "100%",
     maxWidth: 500
   }
 };
 
-class PostsNew extends Component {
+class PostsUpdate extends Component {
   static contextTypes = {
     router: PropTypes.object
   };
 
+  constructor(props) {
+    super(props);
+    // this.state = {};
+  }
+
+  componentWillMount() {
+    this.props.fetchPost(this.props.params.id);
+  }
+
+  // onInputChange = (inputName, value) => {
+  //   this.setState({
+  //     [`${inputName}Value`]: value,
+  //   });
+  // }
+
   onSubmit(props) {
-    this.props.createPost(props).
+    const post_id = this.props.params.id
+    this.props.updatePost(props, post_id).
       then(() => {
         // blog post has been created, navigate user to index
-        this.context.router.push('/');
+        this.context.router.push(`/posts/${post_id}`);
       });
   }
 
   render() {
+    const post = this.props.post;
+    const paramsId = this.props.params.id
     const { fields: {title, categories, content}, handleSubmit } = this.props;
+
+    if(!post || paramsId != post.id) {
+      return (<div>Loading...</div>);
+    }
 
     return (
       <div>
         <Card style={style.card}>
           <form onSubmit={handleSubmit(this.onSubmit.bind(this))}>
-            <CardHeader
-              title="Create new post"
-            />
+          <CardHeader
+            title="Create new post"
+          />
           <CardText>
 
               <div>
-                <TextField {...title} hintText="Title" errorText={ title.touched ? title.error : null } style={style.rootInput} />
+                <TextField
+                  {...title}
+                  hintText="Title"
+                  errorText={ title.touched ? title.error : null }
+                  style={style.rootInput} />
               </div>
 
               <div>
-                <TextField {...categories} hintText="Categories" errorText={ categories.touched ? categories.error : null } style={style.rootInput} />
+                <TextField
+                  {...categories}
+                  hintText="Categories"
+                  errorText={ categories.touched ? categories.error : null }
+                  style={style.rootInput} />
               </div>
 
               <div>
-                <TextField {...content} hintText="Content" multiLine={true} errorText={ content.touched ? content.error : null } style={style.rootInput} />
+                <TextField
+                  {...content}
+                  hintText="Content"
+                  multiLine={true}
+                  errorText={ content.touched ? content.error : null }
+                  style={style.rootInput} />
               </div>
             </CardText>
             <CardActions expandable={true}>
@@ -83,8 +117,15 @@ function validate(values) {
   return errors;
 }
 
+function mapStateToProps(state) {
+  return {
+    post: state.posts.post,
+    initialValues: state.posts.post
+  };
+}
+
 export default reduxForm({
-  form: 'PostsNewForm',
+  form: 'PostsUpdateForm',
   fields: ['title', 'categories', 'content'],
   validate
-}, null, { createPost })(PostsNew);
+}, mapStateToProps, { fetchPost, updatePost })(PostsUpdate);

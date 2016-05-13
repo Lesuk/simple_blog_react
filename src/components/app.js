@@ -23,16 +23,10 @@ const styles = {
   }
 };
 
-function handleTouchTap() {
-  alert('onTouchTap triggered on the title component');
-}
-
 export default class App extends Component {
   constructor(props, context) {
     super(props, context);
-    // this.state = {
-    //   pageTitle: 'Home',
-    // };
+    // this.state = {};
   }
 
   render() {
